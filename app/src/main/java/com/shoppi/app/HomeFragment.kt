@@ -6,8 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TableLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.gson.Gson
 import org.json.JSONObject
 
 class HomeFragment : Fragment() {
@@ -25,21 +29,31 @@ class HomeFragment : Fragment() {
 
         val toolbarTitle = view.findViewById<TextView>(R.id.toolbar_home_title)
         val toolbarIcon = view.findViewById<ImageView>(R.id.toolbar_home_icon)
+        val viewpager = view.findViewById<ViewPager2>(R.id.viewpager_home_banner)
+        val viewpagerIndicator = view.findViewById<TabLayout>(R.id.viewpager_home_banner_indicator)
+
         val assetLoader = AssetLoader()
-        val homeData = assetLoader.getJsonString(requireContext(), "home.json")
-        Log.d("homeData", homeData ?: "")
+        val homeJsonString = assetLoader.getJsonString(requireContext(), "home.json")
+        Log.d("homeData", homeJsonString ?: "")
 
-        if (!homeData.isNullOrEmpty()) {
-            val jsonObject = JSONObject(homeData)
-            val title = jsonObject.getJSONObject("title")
-            val text = title.getString("text")
-            val iconUrl = title.getString("icon_url")
+        if (!homeJsonString.isNullOrEmpty()) {
 
-            toolbarTitle.text = text
+            val gson = Gson()
+            val homeData =  gson.fromJson(homeJsonString, HomeData::class.java)
+
+            toolbarTitle.text = homeData.title.text
 
             GlideApp.with(this)
-                .load(iconUrl)
+                .load(homeData.title.iconUrl)
                 .into(toolbarIcon)
+
+
+            // 불러온 viewpager에 HomeBannerAdapter에서 만든 adapter 핟당
+            // apply: 특정 객체를 생성과 동시에 초기화
+            viewpager.adapter = HomeBannerAdapter().apply {
+                submitList(homeData.topBanners)
+                //submitList: listadapter 에서 제공함
+            }
         }
 
 
