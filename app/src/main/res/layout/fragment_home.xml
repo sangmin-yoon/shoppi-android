@@ -63,6 +63,9 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.tabs.TabLayout
+                app:tabBackground="@drawable/selector_viewpager_indicator"
+                app:tabIndicatorHeight="0dp"
+                app:tabGravity="center"
                 android:id="@+id/viewpager_home_banner_indicator"
                 android:layout_width="0dp"
                 android:layout_height="45dp"
