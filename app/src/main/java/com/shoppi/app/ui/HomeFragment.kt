@@ -1,4 +1,4 @@
-package com.shoppi.app
+package com.shoppi.app.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -6,14 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TableLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.gson.Gson
-import org.json.JSONObject
+import com.shoppi.app.*
 
 class HomeFragment : Fragment() {
     override fun onCreateView(
@@ -23,6 +24,8 @@ class HomeFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
+
+    private val viewModel: HomeViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,18 +45,25 @@ class HomeFragment : Fragment() {
             val gson = Gson()
             val homeData = gson.fromJson(homeJsonString, HomeData::class.java)
 
-            toolbarTitle.text = homeData.title.text
+            viewModel.title.observe(
+                viewLifecycleOwner
+            ) { title ->
+                toolbarTitle.text = title.text
+                GlideApp.with(this)
+                    .load(title.iconUrl)
+                    .into(toolbarIcon)
+            }
 
-            GlideApp.with(this)
-                .load(homeData.title.iconUrl)
-                .into(toolbarIcon)
 
 
-            // 불러온 viewpager에 HomeBannerAdapter에서 만든 adapter 핟당
-            // apply: 특정 객체를 생성과 동시에 초기화
-            viewpager.adapter = HomeBannerAdapter().apply {
-                submitList(homeData.topBanners)
-                //submitList: listadapter 에서 제공함
+
+            viewModel.topBanners.observe(viewLifecycleOwner) { banners ->
+                // 불러온 viewpager에 HomeBannerAdapter에서 만든 adapter 핟당
+                // apply: 특정 객체를 생성과 동시에 초기화
+                viewpager.adapter = HomeBannerAdapter().apply {
+                    submitList(banners)
+                    //submitList: listadapter 에서 제공함
+                }
             }
 
 
@@ -66,8 +76,9 @@ class HomeFragment : Fragment() {
             viewpager.setPageTransformer { page, position ->
                 page.translationX = position * -offset
             }
-            TabLayoutMediator(viewpagerIndicator, viewpager
-            ) { tab, position ->  }.attach()
+            TabLayoutMediator(
+                viewpagerIndicator, viewpager
+            ) { tab, position -> }.attach()
         }
     }
 
