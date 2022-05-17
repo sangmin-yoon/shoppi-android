@@ -1,8 +1,7 @@
-package com.shoppi.app
+package com.shoppi.app.ui.home
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +10,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import org.w3c.dom.Text
+import com.shoppi.app.model.Banner
+import com.shoppi.app.GlideApp
+import com.shoppi.app.R
 import java.text.DecimalFormat
-import kotlin.math.log
 import kotlin.math.roundToInt
 
 
@@ -25,14 +24,14 @@ class HomeBannerAdapter :
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): HomeBannerAdapter.HomeBannerViewHolder {
+    ): HomeBannerViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_home_banner, parent, false)
         return HomeBannerViewHolder(view)
     }
 
     override fun onBindViewHolder(
-        holder: HomeBannerAdapter.HomeBannerViewHolder,
+        holder: HomeBannerViewHolder,
         position: Int
     ) { // onCreateViewHolder가 호출된 이후(잘 생성이 되면) viewHolder가 인자로 전달된다.
         holder.bind(getItem(position)) // 전달된 holder에 데이터를 binding 한다.
