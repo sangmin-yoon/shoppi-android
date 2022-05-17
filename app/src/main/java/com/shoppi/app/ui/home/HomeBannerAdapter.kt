@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.shoppi.app.model.Banner
 import com.shoppi.app.GlideApp
 import com.shoppi.app.R
+import com.shoppi.app.databinding.ItemHomeBannerBinding
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
@@ -21,13 +22,14 @@ import kotlin.math.roundToInt
 //Diffutil callback 구현시 스와이프에 따라 실제 data가 변경되는지 확인 후 데이터가 변경된것이 판명이 되면 그때서야 Layout을 업데이트 해준다. 이때 어떠한 id를 기준으로 구별을 할지 정의를 해줘야 한다.
 class HomeBannerAdapter :
     ListAdapter<Banner, HomeBannerAdapter.HomeBannerViewHolder>(BannerDiffCallback()) {
+    private lateinit var binding: ItemHomeBannerBinding
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
     ): HomeBannerViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_home_banner, parent, false)
-        return HomeBannerViewHolder(view)
+        binding = ItemHomeBannerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return HomeBannerViewHolder(binding)
     }
 
     override fun onBindViewHolder(
@@ -37,43 +39,12 @@ class HomeBannerAdapter :
         holder.bind(getItem(position)) // 전달된 holder에 데이터를 binding 한다.
     }
 
-    class HomeBannerViewHolder(view: View) :
-        RecyclerView.ViewHolder(view) { // 홈배너에서 인플레이트 시킬 view이다
-        private val bannerImageView = view.findViewById<ImageView>(R.id.iv_banner_image)
-        private val bannerBadgeTextView = view.findViewById<TextView>(R.id.tv_banner_badge)
-        private val bannerTitleTextView = view.findViewById<TextView>(R.id.tv_banner_title)
-        private val bannerDetailThumbnailImageView =
-            view.findViewById<ImageView>(R.id.iv_banner_detail_thumbnail)
-        private val bannerDetailBrandLabelTextView =
-            view.findViewById<TextView>(R.id.tv_banner_detail_brand_label)
-        private val bannerDetailProductLabelTextView =
-            view.findViewById<TextView>(R.id.tv_banner_detail_product_label)
-        private val bannerDetailDiscountRateTextView =
-            view.findViewById<TextView>(R.id.tv_banner_detail_product_discount_rate)
-        private val bannerDetailDiscountPriceTextView =
-            view.findViewById<TextView>(R.id.tv_banner_detail_product_discount_price)
-        private val bannerDetailPriceTextView =
-            view.findViewById<TextView>(R.id.tv_banner_detail_product_price)
-
+    class HomeBannerViewHolder(private val binding: ItemHomeBannerBinding) :
+        RecyclerView.ViewHolder(binding.root) { // 홈배너에서 인플레이트 시킬 view이다
 
         fun bind(banner: Banner) { // view holder에 binding할때 사용할 메소드
-            loadImage(banner.backgroundImageUrl, bannerImageView)
-            bannerBadgeTextView.text = banner.badge.label
-            bannerBadgeTextView.background =
-                ColorDrawable(Color.parseColor(banner.badge.backgroundColor))
-            bannerTitleTextView.text = banner.label
-            loadImage(banner.productDetail.thumbnailImageUrl, bannerDetailThumbnailImageView)
-            bannerDetailBrandLabelTextView.text = banner.productDetail.brandName
-            bannerDetailProductLabelTextView.text = banner.productDetail.label
-            bannerDetailDiscountRateTextView.text = "${banner.productDetail.discountRate}%"
-            calculateDiscountAmount(
-                bannerDetailDiscountPriceTextView,
-                banner.productDetail.discountRate,
-                banner.productDetail.price
-            )
-            applyPriceFormat(bannerDetailPriceTextView, banner.productDetail.price)
-
-
+            binding.banner = banner
+            binding.executePendingBindings()
         }
 
         private fun calculateDiscountAmount(view: TextView, discountRate: Int, price: Int) {
@@ -85,12 +56,6 @@ class HomeBannerAdapter :
         private fun applyPriceFormat(view: TextView, price: Int) {
             val decimalFormat = DecimalFormat("#,###")
             view.text = decimalFormat.format(price) + "원"
-        }
-
-        private fun loadImage(urlString: String, imageView: ImageView) {
-            GlideApp.with(itemView)  // viewholder
-                .load(urlString)
-                .into(imageView)
         }
     }
 }
